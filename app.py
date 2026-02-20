@@ -18,19 +18,9 @@ TIMEOUT = 10
 
 app = Flask(__name__)
 
-def make_key(url: str, levels: int) -> str:
-    h = hashlib.sha256(f"{url}|{levels}".encode("utf-8")).hexdigest()
+def make_key(url: str, levels: int, width: int, height: int) -> str:
+    h = hashlib.sha256(f"{url}|{levels}|{width}|{height}".encode("utf-8")).hexdigest()
     return h
-
-# def build_palette(levels: int):
-#     palette = []
-#     for i in range(levels):
-#         v = int(round(i * 255 / (levels - 1)))
-#         palette.extend([v, v, v])
-#     palette += [0] * (768 - len(palette))
-#     pal_img = Image.new("P", (1,1))
-#     pal_img.putpalette(palette)
-#     return pal_img
 
 @app.route("/process")
 def process():
@@ -83,11 +73,10 @@ def process():
     except Exception as e:
         return f"error fetching source: {e}", 502
 
-    # Process: keep original dimensions, convert to L, quantize to palette with Floyd-Steinberg
+    # Process: resize, convert to L, quantize to palette with Floyd-Steinberg
     try:
         im = Image.open(BytesIO(content)).resize((width,height), Image.LANCZOS).convert("L")
-        # pal_img = build_palette(levels)
-        im_p = im.quantize(colors=levels, dither=Image.FLOYDSTEINBERG)
+        im_p = im.quantize(colors=levels, dither=Image.FLOYDSTEINBERG).convert("L")
         # Save to cache atomically
         tmp = cache_file.with_suffix(".tmp")
         im_p.save(tmp, format="PNG", optimize=True)
