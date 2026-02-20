@@ -57,7 +57,7 @@ def process():
         return "invalid height", 400
 
 
-    key = make_key(src, levels)
+    key = make_key(src, levels, width, height)
     cache_file = CACHE_DIR / f"{key}.png"
     etag = f"\"{key}\""
 
