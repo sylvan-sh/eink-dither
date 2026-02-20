@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  dither:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data/cache:/data/cache
+    restart: unless-stopped
